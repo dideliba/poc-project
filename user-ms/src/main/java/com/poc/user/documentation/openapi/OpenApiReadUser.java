@@ -11,14 +11,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.lang.annotation.*;
 
-@Operation(summary = "Creates a user")
+@Operation(summary = "Reads a user")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "User created",
+        @ApiResponse(responseCode = "200", description = "User retrieved successfully",
                 content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))}),
-        @ApiResponse(responseCode = "400", description = "Invalid user data",
+        @ApiResponse(responseCode = "404", description = "Specific User could not be found",
                 content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ApiErrorResponse.class)))}) })
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface OpenApiCreateUser {
+public @interface OpenApiReadUser {
 }

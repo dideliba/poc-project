@@ -1,5 +1,6 @@
 package com.poc.user.controller;
 
+import com.poc.user.documentation.openapi.OpenApiReadUser;
 import com.poc.user.domain.request.ParticularUserInfo;
 import com.poc.user.domain.request.UserInfo;
 import com.poc.user.domain.request.UserInfoList;
@@ -43,6 +44,7 @@ public class UserController {
 
 	    @ResponseStatus(HttpStatus.OK)
 		@GetMapping("/{id}")
+		@OpenApiReadUser
 	    public Mono<UserResponse> readUser(@PathVariable String id) {
 			return userService.readUser(id);
 	    }
