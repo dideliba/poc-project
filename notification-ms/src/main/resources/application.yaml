@@ -1,0 +1,48 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    shutdown:
+      enabled: 'true'
+logging:
+  pattern:
+    file: '%d %p %c{1.} [%t] %m%n'
+    console: '%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n'
+  level:
+    com:
+      poc: DEBUG
+    org:
+      springframework:
+        boot:
+          autoconfigure:
+            mongo: ERROR
+        nodeValue: INFO
+      mongodb:
+        driver: 'ERROR'
+  file:
+    name: logs/registrationApp.log
+endpoints:
+  shutdown:
+    enabled: 'true'
+
+topics:
+  user_account_created:
+    name: new-user-account
+
+spring:
+  kafka:
+    consumer:
+      group-id: "default"
+  mail:
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: 'true'
+          auth: 'false'
+    host: localhost
+    #username: setusername
+    #password: setpassword
+    port: '1025'

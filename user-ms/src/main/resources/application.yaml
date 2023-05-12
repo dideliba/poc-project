@@ -1,0 +1,23 @@
+logging:
+  pattern:
+    file: '%d %p %c{1.} [%t] %m%n'
+    console: '%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n'
+  level:
+    com:
+      poc: DEBUG
+  file:
+    name: logs/userApp.log
+
+openapi:
+  service:
+    title: UserResponse service doc
+    version: 1.0.0
+    url: http://localhost:9080
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /api-docs/swagger-config
+    url: /api-docs
+    disable-swagger-default-url: true

@@ -1,0 +1,45 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    shutdown:
+      enabled: 'true'
+logging:
+  pattern:
+    file: '%d %p %c{1.} [%t] %m%n'
+    console: '%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n'
+  level:
+    com:
+      poc: DEBUG
+    org:
+      springframework:
+        boot:
+          autoconfigure:
+            mongo: ERROR
+        nodeValue: INFO
+      mongodb:
+        driver: 'ERROR '
+  file:
+    name: logs/registrationApp.log
+endpoints:
+  shutdown:
+    enabled: 'true'
+
+topics:
+  user_account_created:
+    name: new-user-account
+
+openapi:
+  service:
+    title: Registration service doc
+    version: 1.0.0
+    url: http://localhost:9081
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    tryItOutEnabled: true
+    path: /swagger-ui.html
+    config-url: /api-docs/swagger-config

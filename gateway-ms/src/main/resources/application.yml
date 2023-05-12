@@ -1,0 +1,39 @@
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - StripPrefix=2
+      routes:
+        - id: user-ms
+          uri: http://localhost:9080
+          predicates:
+            - Path=/api/user-service/**
+        - id: registration-ms
+          uri: http://localhost:9081
+          predicates:
+            - Path=/api/registration-service/**
+
+openapi:
+  service:
+    title: gateway microservice doc #title that you will want to display in the swagger ui
+    version: 1.0.0
+    url: http://localhost:9090 #api gateway url
+
+springdoc:
+  enable-native-support: true
+
+  api-docs:
+    enabled: true
+    path: /api/v1/api-docs #these urls will used to load the swagger ui of this service by the api gateway
+
+  swagger-ui:
+    enabled: true
+    path: /api/v1/swagger-ui.html
+    config-url: /api/v1/api-docs/swagger-config
+    urls:
+      - url: /api/v1/api-docs
+        name: API Gateway Service
+      - url: /api/user-service/api-docs
+        name: User Service
+      - url: /api/registration-service/api-docs
+        name: Registration Service

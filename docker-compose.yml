@@ -1,0 +1,106 @@
+version: "3.7"
+
+services:
+  user:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      image: user-ms:0.0.2-SNAPSHOT
+      container_name: user-ms
+      network_mode: "host"
+      depends_on:
+        - mongo
+        - kafka
+      environment:
+        - SERVER_PORT=9080
+        - SPRING_APPLICATION_NAME=user-ms
+        - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=userDB
+        - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=true
+        - SPRING_DATA_MONGODB_HOST=localhost
+        - SPRING_DATA_MONGODB_PORT=27017
+        - SPRING_DATA_MONGODB_USERNAME=user1
+        - SPRING_DATA_MONGODB_PASSWORD=user1
+        - SPRING_DATA_MONGODB_DATABASE=userDB
+        - SPRING.KAFKA.BOOTSTRAP-SERVERS=localhost:9092
+
+  registration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: registration-ms:0.0.2-SNAPSHOT
+    container_name: registration-ms
+    network_mode: "host"
+    depends_on:
+      - kafka
+      - user
+      - notification
+    environment:
+      - SERVER_PORT=9081
+      - SPRING_APPLICATION_NAME=registration-ms
+      - SPRING.KAFKA.BOOTSTRAP-SERVERS=localhost:9092
+
+  notification:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: notification-ms:0.0.2-SNAPSHOT
+    container_name: notification-ms
+    network_mode: "host"
+    depends_on:
+      - kafka
+      - fakesmtp
+    environment:
+      - SERVER_PORT=9082
+      - SPRING_APPLICATION_NAME=registration-ms
+      - SPRING.KAFKA.BOOTSTRAP-SERVERS=localhost:9092
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gateway-ms:0.0.2-SNAPSHOT
+    container_name: gateway-ms
+    network_mode: "host"
+    depends_on:
+      - user
+      - registration
+    environment:
+      - SERVER_PORT=9090
+      - SPRING_APPLICATION_NAME=gateway-ms
+
+  mongo:
+    image: mongo:4.4.2
+    container_name: mongo
+    network_mode: "host"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=userDB
+      - MONGO_DB_USERNAME=user1
+      - MONGO_DB_PASSWORD=user1
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    command: [ "--bind_ip", "0.0.0.0" ]
+
+  zookeeper:
+    image: zookeeper:3.7.0
+    network_mode: "host"
+    container_name: zookeeper
+
+  kafka:
+    image: obsidiandynamics/kafka
+    network_mode: "host"
+    container_name: kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "localhost:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  fakesmtp:
+    image: hatamiarash7/fake-smtp:latest
+    ports:
+      - 1025:25
+    volumes:
+      - /tmp/fakemail:/output
