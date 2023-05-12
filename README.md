@@ -24,7 +24,8 @@ http://localhost:9080/webjars/swagger-ui/index.html
 ## Usage
 
 ## Design and Architecture
-![](/home/ubuntu/Downloads/poc-Architecture.png)
+
+![pocArchitecture](https://github.com/dideliba/poc-project/assets/60351395/4a5d8abe-6549-443b-9b60-857a5429571e)
 
 ## Improvements
 * Introduce new API operations that fetch paginated user data (that will be used by frontend apps to display users in a grid). 
