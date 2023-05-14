@@ -1,31 +1,72 @@
 package com.poc.user;
 
-
+import com.mongodb.reactivestreams.client.MongoClient;
+import com.mongodb.reactivestreams.client.MongoClients;
 import com.poc.user.dao.impl.mongodb.entity.UserEntity;
 import com.poc.user.dao.impl.mongodb.repository.UserRepository;
+import com.poc.user.domain.request.ParticularUserInfo;
 import com.poc.user.domain.request.UserInfo;
+import com.poc.user.domain.request.UserInfoList;
 import com.poc.user.domain.response.UserResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
+import org.springframework.data.mongodb.ReactiveMongoTransactionManager;
+import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.ReactiveTransactionManager;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-class UserApplicationIntegrationTest {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class UserApplicationIntegrationTest  {
+
+    static final String DB_NAME = "userDB";
+    static final String USERS_ENDPOINT_PATH="/v1/users";
+    static final String MONGO_DB_CONTAINER_VERSION="mongo:4.4.2";
+
+
+    @Autowired
+    private ReactiveMongoTemplate mongoTemplate;
+
+    @ComponentScan
+    static class TransConfig extends AbstractReactiveMongoConfiguration {
+
+        @Bean("reactiveTransactionManager")
+        ReactiveTransactionManager transactionManager(ReactiveMongoDatabaseFactory dbFactory) {
+            return new ReactiveMongoTransactionManager(dbFactory);
+        }
+
+        @Bean
+        @Override
+        public MongoClient reactiveMongoClient() {
+            return MongoClients.create(mongoDBContainer.getReplicaSetUrl());
+        }
+
+        @Override
+        protected String getDatabaseName() {
+            return DB_NAME;
+        }
+    }
+
 
     @Autowired
     UserRepository userRepository;
@@ -33,63 +74,171 @@ class UserApplicationIntegrationTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    public static final String usersUri="/v1/users";
-    @Container
-    public static MongoDBContainer container = new MongoDBContainer(DockerImageName.parse("mongo:4.4.2"))
-            .withReuse(true);
+    public static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.
+            parse(MONGO_DB_CONTAINER_VERSION)).withReuse(true).withCommand("--replSet", "rs0");
+
 
     @DynamicPropertySource
     static void mongoDbProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", container::getReplicaSetUrl);
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
     }
 
     @BeforeAll
-    public static void startContainer() {
-        container.start();
+    public static void initializeTestEnvironment() {
+        //start mongo container
+        mongoDBContainer.start();
+
     }
 
     @BeforeEach
     public void emptyUsersCollection(){
-        //ensure user collection is empty before tests
-        userRepository.deleteAll().block();
+        //ensure user collection is empty before each test
+        mongoTemplate.dropCollection("user").block();
+        mongoTemplate.createCollection("user").block();
     }
 
     @Test
-    void givenNewUser_whenSaved_userExistsOnDB() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId("123");
-        userEntity = userRepository.save(userEntity).block();
+    public void givenNewUser_whenSaved_userExistsOnDB() {
+        UserEntity testUserEntity=new UserEntity();
+        testUserEntity.setId("test"); testUserEntity.setEmail("test@test.com"); testUserEntity.setFirstname("testName");
+        testUserEntity.setLastname("testLastname"); testUserEntity.setUsername("testuser");
+        testUserEntity.setActive(true);
+        
+        UserEntity userEntity=mongoTemplate.save(testUserEntity).block();
+
         assertThat(userEntity.getId()).isNotNull();
         assertEquals(1, userRepository.findAll().count().block());
     }
 
-
     @Test
     void givenAllEligibleFieldsPopulated_whenCreateNewUser_thenUserCreatedSuccessfully() {
-        UserInfo user = new UserInfo();
-        user.setEmail("test@test.com");
-        user.setFirstname("testName");
-        user.setLastname("testLastName");
-        user.setUsername("testUser");
+        UserInfo testUserInfo=new UserInfo();
+        testUserInfo.setEmail("test@test.com"); testUserInfo.setFirstname("testName");
+        testUserInfo.setLastname("testLastname"); testUserInfo.setUsername("testuser");
 
         UserResponse userResponse=webTestClient.post()
-                .uri(usersUri).body(Mono.just(user), UserResponse.class)
+                .uri(USERS_ENDPOINT_PATH).body(Mono.just(testUserInfo), UserResponse.class)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(UserResponse.class)
                 .returnResult().getResponseBody();
-
         UserEntity userEntity= userRepository.findById(userResponse.getId()).block();
 
-        assertEquals(userEntity.getEmail(),user.getEmail());
-        assertEquals(userEntity.getFirstname(),user.getFirstname());
-        assertEquals(userEntity.getLastname(), user.getLastname());
-        assertEquals(userEntity.getUsername(), user.getUsername());
+        assertEquals(userEntity.getEmail(), testUserInfo.getEmail());
+        assertEquals(userEntity.getFirstname(),testUserInfo.getFirstname());
+        assertEquals(userEntity.getLastname(), testUserInfo.getLastname());
+        assertEquals(userEntity.getUsername(), testUserInfo.getUsername());
         assertTrue(userEntity.isActive());
         assertNotNull(userEntity.getCreatedDateTime());
-       // assertNull(userEntity.getUpdatedDateTime());
-        //assertNull(userEntity.getUpdatedDateTime());
+        assertNull(userEntity.getLastModifiedDateTime());
         assertNull(userEntity.getDeactivatedTimestamp());
     }
 
+    @Test
+    void givenSpecificUserExists_whenReadUser_thenUserInfoReadSuccessfully() {
+        UserEntity testUserEntity=new UserEntity();
+        testUserEntity.setId("test"); testUserEntity.setEmail("test@test.com"); testUserEntity.setFirstname("testName");
+        testUserEntity.setLastname("testLastname"); testUserEntity.setUsername("testuser"); testUserEntity.setActive(true);
+        mongoTemplate.insert(testUserEntity).block();
+
+        UserResponse userResponse= webTestClient.get()
+                .uri(USERS_ENDPOINT_PATH+"/test")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserResponse.class)
+                .returnResult().getResponseBody();
+
+        assertEquals(testUserEntity.getEmail(),userResponse.getEmail());
+        assertEquals(testUserEntity.getFirstname(),userResponse.getFirstname());
+        assertEquals(testUserEntity.getLastname(), userResponse.getLastname());
+        assertEquals(testUserEntity.getUsername(), userResponse.getUsername());
+    }
+
+    @Test
+    void givenSpecificUserNotExists_whenReadUser_thenUserNotFound() {
+        webTestClient.get()
+                .uri(USERS_ENDPOINT_PATH+"/1234")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void givenSpecificUsersExists_whenUsersEdited_thenAllFieldsUpdatedSuccessfully() {
+        UserEntity userEntity1=new UserEntity();
+        userEntity1.setId("test"); userEntity1.setEmail("test@test.com"); userEntity1.setFirstname("testName");
+        userEntity1.setLastname("testLastname"); userEntity1.setUsername("testuser"); userEntity1.setActive(true);
+        UserEntity userEntity2=mongoTemplate.save(userEntity1).block();
+        userEntity2.setId("test2");
+        userEntity2.setEmail("test2@test.com");
+        mongoTemplate.save(userEntity2).block();
+
+        ParticularUserInfo userInfo1=new ParticularUserInfo();
+        userInfo1.setId("test");userInfo1.setEmail("newTest@test.com");userInfo1.setUsername("testuser");
+        userInfo1.setLastname("newTestlastname");
+        ParticularUserInfo userInfo2=new ParticularUserInfo();
+        userInfo2.setId("test2");userInfo2.setEmail("newTest2@test.com"); userInfo2.setUsername("testuser");
+        userInfo2.setLastname("newTestlastname2");
+        UserInfoList userInfoList = new UserInfoList() {
+            {
+                add(userInfo1);
+                add(userInfo2);
+            }
+        };
+        List<UserResponse> userResponse= webTestClient.put()
+                .uri(USERS_ENDPOINT_PATH).body(Mono.just(userInfoList), UserInfoList.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(List.class)
+                .returnResult().getResponseBody();
+
+        assertEquals(userInfo1.getEmail(), userRepository.findById("test").block().getEmail());
+        assertEquals(userInfo2.getEmail(), userRepository.findById("test2").block().getEmail());
+        assertEquals(userInfo1.getUsername(), userRepository.findById("test").block().getUsername());
+        assertEquals(userInfo2.getUsername(), userRepository.findById("test2").block().getUsername());
+        assertEquals(userInfo1.getFirstname(), userRepository.findById("test").block().getFirstname());
+        assertEquals(userInfo2.getFirstname(), userRepository.findById("test2").block().getFirstname());
+        assertEquals(userInfo1.getLastname(), userRepository.findById("test").block().getLastname());
+        assertEquals(userInfo2.getLastname(), userRepository.findById("test2").block().getLastname());
+        assertNotNull(userRepository.findById("test2").block().getLastModifiedDateTime());
+    }
+
+    @Test
+    void givenNonExistentUserProvided_whenReadUser_thenUserMotFound() {
+        webTestClient.get()
+                .uri(USERS_ENDPOINT_PATH+"/test")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void givenSpecificUsersExists_whenUsersDeleted_thenUsersNotFetchedAfterDelete() {
+        UserEntity userEntity1=new UserEntity();
+        userEntity1.setId("test"); userEntity1.setEmail("test@test.com"); userEntity1.setFirstname("testName");
+        userEntity1.setLastname("testLastname"); userEntity1.setUsername("testuser");userEntity1.setActive(true);
+        UserEntity userEntity2=new UserEntity();
+        userEntity2.setId("test2"); userEntity2.setEmail("test2@test.com"); userEntity2.setFirstname("testName2");
+        userEntity2.setLastname("testLastname2"); userEntity2.setUsername("testuser2");userEntity2.setActive(true);
+        mongoTemplate.insert(userEntity1).block();
+        mongoTemplate.insert(userEntity2).block();
+
+        List<UserResponse> userReadResponse= webTestClient.get()
+                .uri(USERS_ENDPOINT_PATH+"?id=test&id=test2")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(List.class)
+                .returnResult().getResponseBody();
+        webTestClient.delete()
+                .uri(USERS_ENDPOINT_PATH+"?id=test&id=test2")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(List.class);
+        List<UserResponse> userReadResponseAfterDeletion= webTestClient.get()
+                .uri(USERS_ENDPOINT_PATH+"?id=test&id=test2")
+                .exchange()
+                .expectBody(List.class)
+                .returnResult().getResponseBody();
+
+        assertEquals(2,userReadResponse.size());
+        assertEquals(0,userReadResponseAfterDeletion.size());
+    }
 }

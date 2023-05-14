@@ -1,6 +1,6 @@
 /**
- * The main package of the kalah game
+ * The main package of the registration app
  * @author didel
  *
  */
-package com.poc.user;
+package com.poc.registration;

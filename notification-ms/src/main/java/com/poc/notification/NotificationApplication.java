@@ -12,7 +12,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootApplication
 @EnableKafka
 public class NotificationApplication {
-	
 	public static void main(String[] args) {
 		SpringApplication.run(NotificationApplication.class, args);
 	}

@@ -1,6 +1,7 @@
 package com.poc.registration.service;
 
-import com.poc.registration.domain.User;
+import com.poc.registration.domain.UserInfo;
+import com.poc.registration.domain.UserResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -9,6 +10,5 @@ import reactor.core.publisher.Mono;
  *
  */
 public interface RegistrationService {
-
-	public Mono<User> registerUser(User user);
+	public Mono<UserResponse> registerUser(UserInfo user);
 }

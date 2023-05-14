@@ -1,6 +1,6 @@
 package com.poc.user.controller;
 
-import com.poc.user.documentation.openapi.OpenApiReadUser;
+import com.poc.user.documentation.openapi.*;
 import com.poc.user.domain.request.ParticularUserInfo;
 import com.poc.user.domain.request.UserInfo;
 import com.poc.user.domain.request.UserInfoList;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import com.poc.user.documentation.openapi.OpenApiCreateUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import javax.validation.Valid;
@@ -51,30 +50,35 @@ public class UserController {
 
 		@ResponseStatus(HttpStatus.OK)
 		@GetMapping()
+		@OpenApiReadUsers
 		public Flux<UserResponse> readUsers(@RequestParam(name="id") List<String> ids) {
 			return userService.readUsers(ids);
 		}
 
 		@ResponseStatus(HttpStatus.OK)
 		@DeleteMapping("/{id}")
+		@OpenApiDeleteUser
 		public Mono<UserResponse> deleteUser(@PathVariable String id){
 				return userService.deleteUser(id);
 		}
 
 		@ResponseStatus(HttpStatus.OK)
 		@DeleteMapping()
+		@OpenApiDeleteUsers
 		public Flux<UserResponse> deleteUsers(@RequestParam(name="id") List<String> ids){
 			return userService.deleteUsers(ids);
 		}
 
 		@ResponseStatus(HttpStatus.OK)
 		@PutMapping("/{id}")
+		@OpenApiEditUser
 		public Mono<UserResponse> upsertUser(@PathVariable String id, @Valid @RequestBody UserInfo user) {
 			return userService.upsertUser(id, user);
 		}
 
 		@ResponseStatus(HttpStatus.OK)
 		@PutMapping()
+		@OpenApiEditUsers
 		public Flux<UserResponse> upsertUsers(@RequestBody @NotEmpty(message = "User info list cannot be empty.")
 													  @Valid UserInfoList<ParticularUserInfo> users) {
 			return userService.upsertUsers(users);

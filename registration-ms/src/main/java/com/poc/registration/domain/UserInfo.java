@@ -1,4 +1,4 @@
-package com.poc.user.domain.request;
+package com.poc.registration.domain;
 
 
 import lombok.Data;

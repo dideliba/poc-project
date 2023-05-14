@@ -1,14 +1,16 @@
 package com.poc.registration.controller;
 
 import com.poc.registration.documentation.openapi.OpenApiRegisterUser;
-import com.poc.registration.domain.User;
+import com.poc.registration.domain.UserInfo;
+import com.poc.registration.domain.UserResponse;
 import com.poc.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 
 /**
@@ -27,7 +29,7 @@ public class RegistrationController {
 		@ResponseStatus(HttpStatus.CREATED)
 		@PostMapping("/user.register")
 	    @OpenApiRegisterUser
-		public Mono<User> registerUser(@RequestBody User user) {
+		public Mono<UserResponse> registerUser(@RequestBody @Valid UserInfo user) {
 			return registrationService.registerUser(user);
 	    }
 }

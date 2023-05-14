@@ -1,13 +1,11 @@
 package com.poc.user.domain.response;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 /**
  * Class that represents a user resource

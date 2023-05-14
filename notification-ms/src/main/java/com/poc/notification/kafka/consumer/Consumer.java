@@ -24,7 +24,6 @@ public class Consumer {
     public void consumeMessage(String message) throws JsonProcessingException {
         log.info("message consumed {}", message);
         User user = objectMapper.readValue(message, User.class);
-
         emailService.sendUserEmail(user);
     }
 }

@@ -1,11 +1,8 @@
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    shutdown:
-      enabled: 'true'
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+
 logging:
   pattern:
     file: '%d %p %c{1.} [%t] %m%n'
@@ -13,14 +10,6 @@ logging:
   level:
     com:
       poc: DEBUG
-    org:
-      springframework:
-        boot:
-          autoconfigure:
-            mongo: ERROR
-        nodeValue: INFO
-      mongodb:
-        driver: 'ERROR '
   file:
     name: logs/registrationApp.log
 endpoints:
@@ -40,6 +29,7 @@ springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
-    tryItOutEnabled: true
     path: /swagger-ui.html
     config-url: /api-docs/swagger-config
+    url: /api-docs
+    disable-swagger-default-url: true

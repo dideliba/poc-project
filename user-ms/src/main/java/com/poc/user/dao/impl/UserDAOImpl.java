@@ -3,7 +3,6 @@ package com.poc.user.dao.impl;
 import com.poc.user.dao.impl.mongodb.entity.UserEntity;
 import com.poc.user.dao.impl.mongodb.repository.UserRepository;
 import com.poc.user.dao.UserDAO;
-import com.poc.user.domain.request.ParticularUserInfo;
 import com.poc.user.domain.request.UserInfo;
 import com.poc.user.domain.response.UserResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +12,9 @@ import org.springframework.stereotype.Repository;
 import org.modelmapper.ModelMapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Implementation of the DAO layer
@@ -72,11 +69,6 @@ public class UserDAOImpl implements UserDAO {
 				.map(savedEntity -> modelMapper.map(savedEntity, UserResponse.class));
 	}
 
-	/*@Override
-	public Flux<UserResponse> saveAll(List<ParticularUserInfo> users) {
-		return users.stream().filter(Objects::nonNull).map(u->this.saveWithId(u.getId(),u));
-	}*/
-
 
 	@Override
 	public Mono<UserResponse> delete(String id) {
@@ -105,5 +97,4 @@ public class UserDAOImpl implements UserDAO {
 				})
 				.map(entity -> modelMapper.map(entity, UserResponse.class));
 	}
-
 }

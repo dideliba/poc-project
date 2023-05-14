@@ -1,11 +1,3 @@
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    shutdown:
-      enabled: 'true'
 logging:
   pattern:
     file: '%d %p %c{1.} [%t] %m%n'
@@ -13,14 +5,6 @@ logging:
   level:
     com:
       poc: DEBUG
-    org:
-      springframework:
-        boot:
-          autoconfigure:
-            mongo: ERROR
-        nodeValue: INFO
-      mongodb:
-        driver: 'ERROR'
   file:
     name: logs/registrationApp.log
 endpoints:
@@ -43,6 +27,4 @@ spring:
             enable: 'true'
           auth: 'false'
     host: localhost
-    #username: setusername
-    #password: setpassword
     port: '1025'

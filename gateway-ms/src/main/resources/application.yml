@@ -15,16 +15,16 @@ spring:
 
 openapi:
   service:
-    title: gateway microservice doc #title that you will want to display in the swagger ui
+    title: gateway microservice doc
     version: 1.0.0
-    url: http://localhost:9090 #api gateway url
+    url: http://localhost:9090
 
 springdoc:
   enable-native-support: true
 
   api-docs:
     enabled: true
-    path: /api/v1/api-docs #these urls will used to load the swagger ui of this service by the api gateway
+    path: /api/v1/api-docs
 
   swagger-ui:
     enabled: true

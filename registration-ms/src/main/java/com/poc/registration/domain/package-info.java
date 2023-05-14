@@ -3,4 +3,4 @@
  * @author didel
  *
  */
-package com.poc.user.domain;
+package com.poc.registration.domain;

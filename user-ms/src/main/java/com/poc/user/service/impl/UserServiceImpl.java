@@ -15,9 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,15 +37,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Flux<UserResponse> readUsers(List<String> ids){
-       /* List<UserResponse> employeeList = Arrays.asList(
-                new UserResponse("1","1","1","1","1",null,null),
-                new UserResponse("2","1","1","1","1",null,null),
-                new UserResponse("3","1","1","1","1",null,null)
-        );
-        Flux<UserResponse> employeeFlux = Flux.fromIterable(employeeList).delayElements(Duration.ofSeconds(3));*/
         return userDAO.getAll(ids);
     }
-
 
     @Override
     public Mono<UserResponse> createUser(UserInfo user) {

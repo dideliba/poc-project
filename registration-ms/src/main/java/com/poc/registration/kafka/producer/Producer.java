@@ -3,7 +3,7 @@ package com.poc.registration.kafka.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.poc.registration.domain.User;
+import com.poc.registration.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +26,7 @@ public class Producer {
         this.objectMapper = objectMapper;
     }
 
-    public void sendMessage(User user) throws JsonProcessingException {
-
+    public void sendMessage(UserInfo user) throws JsonProcessingException {
             String userMessage = objectMapper.writeValueAsString(user);
             kafkaTemplate.send(topic, userMessage);
             log.info("new account event produced {}", userMessage);
