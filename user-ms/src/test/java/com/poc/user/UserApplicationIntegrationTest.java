@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.ReactiveMongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
@@ -26,10 +25,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +42,9 @@ class UserApplicationIntegrationTest  {
     static final String USERS_ENDPOINT_PATH="/v1/users";
     static final String MONGO_DB_CONTAINER_VERSION="mongo:4.4.2";
 
+
+    @Autowired
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private ReactiveMongoTemplate mongoTemplate;
@@ -124,14 +126,13 @@ class UserApplicationIntegrationTest  {
                 .returnResult().getResponseBody();
         UserEntity userEntity= userRepository.findById(userResponse.getId()).block();
 
-        assertEquals(userEntity.getEmail(), testUserInfo.getEmail());
-        assertEquals(userEntity.getFirstname(),testUserInfo.getFirstname());
-        assertEquals(userEntity.getLastname(), testUserInfo.getLastname());
-        assertEquals(userEntity.getUsername(), testUserInfo.getUsername());
-        assertTrue(userEntity.isActive());
-        assertNotNull(userEntity.getCreatedDateTime());
-        assertNull(userEntity.getLastModifiedDateTime());
-        assertNull(userEntity.getDeactivatedTimestamp());
+        assertEquals(testUserInfo.getEmail(),userResponse.getEmail());
+        assertEquals(testUserInfo.getFirstname(),userResponse.getFirstname());
+        assertEquals(testUserInfo.getLastname(),userResponse.getLastname());
+        assertEquals(testUserInfo.getUsername(),userResponse.getUsername());
+        assertTrue(userEntity.isActive()); assertNull(userEntity.getDeactivatedTimestamp());
+        assertNotNull(userResponse.getCreatedDateTime());
+        assertNull(userResponse.getLastModifiedDateTime());
     }
 
     @Test
@@ -184,22 +185,20 @@ class UserApplicationIntegrationTest  {
                 add(userInfo2);
             }
         };
-        List<UserResponse> userResponse= webTestClient.put()
-                .uri(USERS_ENDPOINT_PATH).body(Mono.just(userInfoList), UserInfoList.class)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(List.class)
-                .returnResult().getResponseBody();
 
-        assertEquals(userInfo1.getEmail(), userRepository.findById("test").block().getEmail());
-        assertEquals(userInfo2.getEmail(), userRepository.findById("test2").block().getEmail());
-        assertEquals(userInfo1.getUsername(), userRepository.findById("test").block().getUsername());
-        assertEquals(userInfo2.getUsername(), userRepository.findById("test2").block().getUsername());
-        assertEquals(userInfo1.getFirstname(), userRepository.findById("test").block().getFirstname());
-        assertEquals(userInfo2.getFirstname(), userRepository.findById("test2").block().getFirstname());
-        assertEquals(userInfo1.getLastname(), userRepository.findById("test").block().getLastname());
-        assertEquals(userInfo2.getLastname(), userRepository.findById("test2").block().getLastname());
-        assertNotNull(userRepository.findById("test2").block().getLastModifiedDateTime());
+       webTestClient.put()
+               .uri(USERS_ENDPOINT_PATH).body(Mono.just(userInfoList), UserInfoList.class)
+               .exchange()
+               .expectStatus().isOk()
+               .expectBody()
+               .jsonPath("$[0].id").isEqualTo(userInfo1.getId()).jsonPath("$[1].id")
+               .isEqualTo(userInfo2.getId()).jsonPath("$[0].email").isEqualTo(userInfo1.getEmail())
+               .jsonPath("$[1].email").isEqualTo(userInfo2.getEmail()).jsonPath("$[0].firstname")
+               .isEqualTo(userInfo1.getFirstname()).jsonPath("$[1].firstname").isEqualTo(userInfo2.getFirstname())
+               .jsonPath("$[0].lastname").isEqualTo(userInfo1.getLastname()).jsonPath("$[1].lastname")
+               .isEqualTo(userInfo2.getLastname()).jsonPath("$[0].lastname").isEqualTo(userInfo1.getLastname())
+               .jsonPath("$[0].lastModifiedDateTime").isNotEmpty().jsonPath("$[1].lastModifiedDateTime")
+               .isNotEmpty();
     }
 
     @Test
