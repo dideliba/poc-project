@@ -45,7 +45,7 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public Mono<UserResponse> save(UserInfo user) {
 		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-		userEntity.setCreatedDateTime(LocalDateTime.now());
+		userEntity.setCreatedDateTime(Instant.now());
 		userEntity.setActive(true);
 		return userRepository.save(userEntity)
 				.flatMap(savedEntity -> Mono.just(modelMapper.map(savedEntity, UserResponse.class)));
@@ -57,13 +57,13 @@ public class UserDAOImpl implements UserDAO {
 				.switchIfEmpty(Mono.defer(() -> {
 					UserEntity userEntity=modelMapper.map(user,UserEntity.class);
 					userEntity.setId(id);
-					userEntity.setCreatedDateTime(LocalDateTime.now());
+					userEntity.setCreatedDateTime(Instant.now());
 					userEntity.setActive(true);
 					return userRepository.save(userEntity);
 				}))
 				.flatMap(entity -> {
 					BeanUtils.copyProperties(user, entity);
-					entity.setLastModifiedDateTime(LocalDateTime.now());
+					entity.setLastModifiedDateTime(Instant.now());
 					return userRepository.save(entity);
 				})
 				.map(savedEntity -> modelMapper.map(savedEntity, UserResponse.class));

@@ -24,7 +24,7 @@ public class UserEntity {
 	private String firstname;
 	private String lastname;
 	private boolean active;
-	private LocalDateTime createdDateTime;
-	private LocalDateTime lastModifiedDateTime;
+	private Instant createdDateTime;
+	private Instant lastModifiedDateTime;
 	private Instant deactivatedTimestamp;
 }

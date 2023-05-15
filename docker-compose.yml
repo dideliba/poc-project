@@ -38,6 +38,8 @@ services:
       - SERVER_PORT=9081
       - SPRING_APPLICATION_NAME=registration-ms
       - SPRING.KAFKA.BOOTSTRAP-SERVERS=localhost:9092
+      - EXTERNAL_SERVICE_USER_URL="http://localhost:9080"
+
 
   notification:
     build:
@@ -53,6 +55,8 @@ services:
       - SERVER_PORT=9082
       - SPRING_APPLICATION_NAME=registration-ms
       - SPRING.KAFKA.BOOTSTRAP-SERVERS=localhost:9092
+      - SPRING_MAIL_HOST:localhost
+      - SPRING_MAIL_PORT:25
 
   gateway:
     build:
@@ -81,6 +85,8 @@ services:
     volumes:
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     command: [ "--bind_ip", "0.0.0.0","--replSet", "rs0"]
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u root -p root --quiet) -eq 1
 
 
   zookeeper:
@@ -101,7 +107,6 @@ services:
 
   fakesmtp:
     image: hatamiarash7/fake-smtp:latest
-    ports:
-      - 1025:25
+    network_mode: "host"
     volumes:
       - /tmp/fakemail:/output

@@ -27,4 +27,4 @@ spring:
             enable: 'true'
           auth: 'false'
     host: localhost
-    port: '1025'
+    port: '25'

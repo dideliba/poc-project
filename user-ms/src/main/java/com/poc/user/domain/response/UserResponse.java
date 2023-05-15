@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -21,6 +22,6 @@ public class UserResponse {
 	private String email;
 	private String firstname;
 	private String lastname;
-	private LocalDateTime createdDateTime;
-	private LocalDateTime lastModifiedDateTime;
+	private Instant createdDateTime;
+	private Instant lastModifiedDateTime;
 }

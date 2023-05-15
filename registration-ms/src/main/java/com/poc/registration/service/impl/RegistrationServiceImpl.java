@@ -41,6 +41,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .exchangeToMono(response -> {
                     if (response.statusCode().equals(HttpStatus.CREATED)) {
                         try {
+                            log.info("User {} registered with info {}", user,response.bodyToMono(UserResponse.class));
                             producer.sendMessage(user);
                             return response.bodyToMono(UserResponse.class);
                         } catch (Exception e) {
@@ -50,10 +51,14 @@ public class RegistrationServiceImpl implements RegistrationService {
                             job (running for example every 5 minutes) and to retry sending notification event to kafka
                             so that an email can eventually be sent
                              */
-                            return response.bodyToMono(UserResponse.class); // we consider the registration successful though
+                            log.error("Exception occur after successful registration: ", e);
+                            return response.bodyToMono(UserResponse.class); //we consider the registration successful though
                         }
                     }  else {
-                        throw new RegistrationException(response.bodyToMono(ApiErrorResponse.class),response.statusCode());
+                        log.error("User service error status: {} , body: {}", response.statusCode(),
+                                response.bodyToMono(ApiErrorResponse.class));
+                        throw new RegistrationException(response.bodyToMono(ApiErrorResponse.class),
+                                response.statusCode());
                     }
                 });
     }

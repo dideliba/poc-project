@@ -34,32 +34,10 @@ import java.util.TimeZone;
 @SpringBootApplication
 public class UserApplication {
 
-	//DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
-/*
-	@Bean
-	public DateTimeFormatter iso8601DateTimeFormatter() {
-		return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-				.withZone(ZoneOffset.UTC);
-	}
-*/
-	/*@Bean
-	public WebFluxConfigurer webFluxConfigurer(DateTimeFormatter dateTimeFormatter) {
-		return new WebFluxConfigurer() {
-			@Override
-			public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
-				ObjectMapper objectMapper = new ObjectMapper()
-						.registerModule(new JavaTimeModule())
-						.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-						.setTimeZone(TimeZone.getTimeZone("UTC"));
-				configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper));
-			}
-		};
-	}*/
 
 	public static void main(String[] args) {
 		SpringApplication.run(UserApplication.class, args);
