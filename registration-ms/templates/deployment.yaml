@@ -1,0 +1,31 @@
+# registration-ms/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "registration-ms.fullname" . }}
+  labels:
+    app: {{ include "registration-ms.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "registration-ms.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "registration-ms.name" . }}
+    spec:
+      containers:
+        - name: {{ include "registration-ms.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.environment.SERVER_PORT }}"
+            - name: SPRING_APPLICATION_NAME
+              value: "{{ .Values.environment.SPRING_APPLICATION_NAME }}"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.environment.SPRING_KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: EXTERNAL_SERVICE_USER_URL
+              value: "{{ .Values.environment.EXTERNAL_SERVICE_USER_URL }}"

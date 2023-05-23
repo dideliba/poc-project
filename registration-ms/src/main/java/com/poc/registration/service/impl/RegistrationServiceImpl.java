@@ -11,6 +11,7 @@ import com.poc.registration.kafka.producer.Producer;
 import com.poc.registration.service.RegistrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,12 +31,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Autowired
     private Producer producer;
 
-    WebClient userWebclient = WebClient.create("http://localhost:9080/v1");
+    @Value("${external.service.user.url}")
+    private String userServiceUrl;
+
+
+    WebClient userWebclient = WebClient.create();
 
     @Override
     public Mono<UserResponse> registerUser(UserInfo user) {
         return  userWebclient.post()
-                .uri("/users")
+                .uri(userServiceUrl+"/v1/users")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(user), UserInfo.class)
                 .exchangeToMono(response -> {

@@ -1,0 +1,9 @@
+# Project exclude paths
+/gateway-ms/target/
+/gateway-ms/logs
+/notification-ms/target/
+/notification-ms/logs
+/registration-ms/target/
+/registration-ms/logs
+/user-ms/target/
+/user-ms/logs

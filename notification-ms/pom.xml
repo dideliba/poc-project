@@ -5,7 +5,7 @@
     <artifactId>notification-ms</artifactId>
     <version>0.0.2-SNAPSHOT</version>
     <name>notification-ms</name>
-    <description>Provides registration related Rest API</description>
+    <description>Provides notification related services</description>
     <parent>
         <groupId>com.poc</groupId>
         <artifactId>poc-project</artifactId>

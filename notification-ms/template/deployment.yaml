@@ -1,0 +1,33 @@
+# notification-ms/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "notification-ms.fullname" . }}
+  labels:
+    app: {{ include "notification-ms.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "notification-ms.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "notification-ms.name" . }}
+    spec:
+      containers:
+        - name: {{ include "notification-ms.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.environment.SERVER_PORT }}"
+            - name: SPRING_APPLICATION_NAME
+              value: "{{ .Values.environment.SPRING_APPLICATION_NAME }}"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.environment.SPRING_KAFKA_BOOTSTRAP_SERVERS }}"
+            - name: SPRING_MAIL_HOST
+              value: "{{ .Values.environment.SPRING_MAIL_HOST }}"
+            - name: SPRING_MAIL_PORT
+              value: "{{ .Values.environment.SPRING_MAIL_PORT }}"

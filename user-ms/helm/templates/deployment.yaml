@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "user-ms.fullname" . }}
+  labels:
+    {{- include "user-ms.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "user-ms.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "user-ms.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "user-ms.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.env.SERVER_PORT }}"
+            - name: SPRING_APPLICATION_NAME
+              value: "{{ .Values.env.SPRING_APPLICATION_NAME }}"
+            - name: SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE }}"
+            - name: SPRING_DATA_MONGODB_AUTO_INDEX_CREATION
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_AUTO_INDEX_CREATION }}"
+            - name: SPRING_DATA_MONGODB_HOST
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_HOST }}"
+            - name: SPRING_DATA_MONGODB_PORT
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_PORT }}"
+            - name: SPRING_DATA_MONGODB_USERNAME
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_USERNAME }}"
+            - name: SPRING_DATA_MONGODB_PASSWORD
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_PASSWORD }}"
+            - name: SPRING_DATA_MONGODB_DATABASE
+              value: "{{ .Values.env.SPRING_DATA_MONGODB_DATABASE }}"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.env.SPRING_KAFKA_BOOTSTRAP_SERVERS }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            {{- range .Values.service.ports }}
+            - containerPort: {{ int .targetPort }}
+              {{- if .protocol }}
+              protocol: {{ .protocol }}
+              {{- end }}
+              {{- if .name }}
+              name: {{ .name }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+              scheme: {{ .Values.livenessProbe.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.readinessProbe.port }}
+              scheme: {{ .Values.readinessProbe.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}          
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

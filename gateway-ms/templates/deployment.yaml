@@ -1,0 +1,27 @@
+# gateway-ms/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gateway-ms.fullname" . }}
+  labels:
+    app: {{ include "gateway-ms.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "gateway-ms.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "gateway-ms.name" . }}
+    spec:
+      containers:
+        - name: {{ include "gateway-ms.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.environment.SERVER_PORT }}"
+            - name: SPRING_APPLICATION_NAME
+              value: "{{ .Values.environment.SPRING_APPLICATION_NAME }}"

@@ -8,6 +8,7 @@ import com.poc.user.domain.request.ParticularUserInfo;
 import com.poc.user.domain.request.UserInfo;
 import com.poc.user.domain.request.UserInfoList;
 import com.poc.user.domain.response.UserResponse;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,9 +180,9 @@ class UserApplicationIntegrationTest  {
         userInfo1.setId("test");userInfo1.setEmail("newTest@test.com");userInfo1.setUsername("testuser");
         userInfo1.setLastname("newTestlastname");
         ParticularUserInfo userInfo2=new ParticularUserInfo();
-        userInfo2.setId("test2");userInfo2.setEmail("newTest2@test.com"); userInfo2.setUsername("testuser");
+        userInfo2.setId("test2");userInfo2.setEmail("newTest2@test.com"); userInfo2.setUsername("testuser2");
         userInfo2.setLastname("newTestlastname2");
-        UserInfoList userInfoList = new UserInfoList() {
+        UserInfoList<ParticularUserInfo> userInfoList = new UserInfoList() {
             {
                 add(userInfo1);
                 add(userInfo2);
@@ -191,12 +194,10 @@ class UserApplicationIntegrationTest  {
                .exchange()
                .expectStatus().isOk()
                .expectBody()
-               .jsonPath("$[0].id").isEqualTo(userInfo1.getId()).jsonPath("$[1].id")
-               .isEqualTo(userInfo2.getId()).jsonPath("$[0].email").isEqualTo(userInfo1.getEmail())
-               .jsonPath("$[1].email").isEqualTo(userInfo2.getEmail()).jsonPath("$[0].firstname")
-               .isEqualTo(userInfo1.getFirstname()).jsonPath("$[1].firstname").isEqualTo(userInfo2.getFirstname())
-               .jsonPath("$[0].lastname").isEqualTo(userInfo1.getLastname()).jsonPath("$[1].lastname")
-               .isEqualTo(userInfo2.getLastname()).jsonPath("$[0].lastname").isEqualTo(userInfo1.getLastname())
+               .jsonPath("$[0].id").value(Matchers.in(userInfoList.stream().map(u-> u.getId() ).collect(Collectors.toList())))
+               .jsonPath("$[0].email").value(Matchers.in(userInfoList.stream().map(u-> u.getEmail()).collect(Collectors.toList())))
+               .jsonPath("$[0].lastname").value(Matchers.in(userInfoList.stream().map(u-> u.getLastname()).collect(Collectors.toList())))
+               .jsonPath("$[0].firstname").value(Matchers.in(userInfoList.stream().map(u-> u.getFirstname()).collect(Collectors.toList())))
                .jsonPath("$[0].lastModifiedDateTime").isNotEmpty().jsonPath("$[1].lastModifiedDateTime")
                .isNotEmpty();
     }

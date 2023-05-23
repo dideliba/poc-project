@@ -3,8 +3,7 @@ logging:
     file: '%d %p %c{1.} [%t] %m%n'
     console: '%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n'
   level:
-    com:
-      poc: DEBUG
+    com: DEBUG
   file:
     name: logs/userApp.log
 
@@ -21,3 +20,7 @@ springdoc:
     config-url: /api-docs/swagger-config
     url: /api-docs
     disable-swagger-default-url: true
+
+server:
+  servlet:
+    context-path: /

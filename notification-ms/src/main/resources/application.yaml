@@ -6,7 +6,7 @@ logging:
     com:
       poc: DEBUG
   file:
-    name: logs/registrationApp.log
+    name: logs/notificationApp.log
 endpoints:
   shutdown:
     enabled: 'true'
