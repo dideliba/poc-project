@@ -11,8 +11,7 @@
 	<version>0.0.2-SNAPSHOT</version>
 
 	<properties>
-		<java.version>11</java.version>
-		<spring-cloud.version>2021.0.7</spring-cloud.version>
+		<spring-cloud.version>2022.0.3</spring-cloud.version>
 	</properties>
 
 	<dependencies>

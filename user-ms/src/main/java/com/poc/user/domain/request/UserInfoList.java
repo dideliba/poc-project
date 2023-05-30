@@ -3,7 +3,7 @@ package com.poc.user.domain.request;
 import lombok.Data;
 import lombok.experimental.Delegate;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -62,8 +62,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     }  else {
                         log.error("User service error status: {} , body: {}", response.statusCode(),
                                 response.bodyToMono(ApiErrorResponse.class));
-                        throw new RegistrationException(response.bodyToMono(ApiErrorResponse.class),
-                                response.statusCode());
+                        throw new RegistrationException(response.bodyToMono(ApiErrorResponse.class),response.statusCode());
                     }
                 });
     }

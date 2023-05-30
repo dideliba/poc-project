@@ -3,7 +3,7 @@ package com.poc.registration.domain;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Class that represents a user request body for create user operation.

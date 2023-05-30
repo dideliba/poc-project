@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11-openj9:alpine-slim
+FROM ibm-semeru-runtimes:open-17.0.4.1_1-jre-jammy
 VOLUME /tmp
 
 ARG JAR_FILE

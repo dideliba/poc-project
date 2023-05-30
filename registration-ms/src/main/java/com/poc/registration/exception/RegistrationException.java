@@ -7,6 +7,7 @@ import com.poc.registration.domain.ApiErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import reactor.core.publisher.Mono;
 
 /**
@@ -19,5 +20,5 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class RegistrationException extends RuntimeException {
 	Mono<ApiErrorResponse> apiExceptionMono;
-	HttpStatus httpStatus;
+	HttpStatusCode httpStatusCode;
 }

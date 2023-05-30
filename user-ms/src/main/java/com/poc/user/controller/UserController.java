@@ -15,8 +15,8 @@ import reactor.core.publisher.Mono;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
