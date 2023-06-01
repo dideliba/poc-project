@@ -1,12 +1,12 @@
 # User Registration PoC
 
-This project is a PoC implementation of a user registration platform. It consists of four dockerized microservices 
+This project is a Spring boot 3 PoC implementation of a user registration platform. It consists of four dockerized microservices 
 namely: gateway-ms (a spring cloud gateway implementation), notification-ms (used to send emails leveraging a 
 fake smtp server), user-ms (that exposes a RESTful CRUD API for user resources) and the registration-ms 
 acting as an RPC style orchestrator service that enables a user to register to the platform.
 ## Installation
 
-For successful installation JDK 11, Docker & Docker compose are required
+For successful installation JDK 17, Docker & Docker compose are required
 
 In the project root directory  **poc-project** execute buidAndDeploy.sh
 This script builds the application, runs integration tests, creates docker images and finally
